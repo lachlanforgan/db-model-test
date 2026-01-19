@@ -1,0 +1,20 @@
+There is a utility in the Tools folder that reads the data model definition in Model.xlsx and then generates some additional artifacts:
+JSON file
+DDL script
+Images
+
+These artifacts should always be maintained in source control and should always match the model that's defined in the Model.xlsx file. 
+
+Today, a developer is responsible for updating the model in Model.xlsx, then manually generating these artifacts and including them on a PR when they are committing to source control.
+
+The issue is that people don't always remember to do this.
+
+So, I want these artifacts to be created automatically when a Pull Request is created and added to the pull request. Then the developer only ever has to modify Model.xlsx.
+
+The workflow is therefore this for a developer:
+1. They update Model.xlsx with changes to the data model
+2. They create a Pull Request with the new Model.xlsx and with a suitable comment explaining their changes
+3. A github Action detects that there is a change to Model.xlsx and runs the utility to generate the artifacts above
+4. The action then adds these generated items to the PR
+5. When the PR is approved and merged, these artifacts get included in the merged
+

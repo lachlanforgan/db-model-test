@@ -1,0 +1,55 @@
+name: Generate Model Artifacts
+
+on:
+  pull_request:
+    paths:
+      - 'model/Model.xlsx'
+
+jobs:
+  generate-artifacts:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Get the code from the PR branch
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Step 3: Install Python dependencies
+      - name: Install Python dependencies
+        run: pip install pandas openpyxl
+
+      # Step 4: Install D2
+      - name: Install D2
+        run: |
+          curl -fsSL https://d2lang.com/install.sh | sh -s --
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # Step 5: Run the model generator
+      - name: Generate model artifacts
+        working-directory: tools
+        run: |
+          python ModelGenerator.py -mode ddl -model ../model/Model.xlsx -sheet "Cobra Web" -out ../oracle/deployment
+          python ModelGenerator.py -mode d2 -model ../model/Model.xlsx -sheet "Cobra Web" -out ../model
+          python ModelGenerator.py -mode sjson -model ../model/Model.xlsx -sheet "Cobra Web" -out ../model
+
+      # Step 6: Generate SVG diagram from D2 file
+      - name: Generate SVG diagram
+        run: d2 model/Model.d2 model/Model.svg
+
+      # Step 7: Commit the generated files back to the PR
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add oracle/deployment/Model_Oracle.sql model/Model.d2 model/Model.svg model/Model_json_structured.json
+          git diff --staged --quiet || git commit -m "Auto-generate model artifacts from Model.xlsx"
+          git push
