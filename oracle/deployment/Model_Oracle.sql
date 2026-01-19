@@ -55,35 +55,35 @@ IS
   newQuery NCLOB;
   tableSpace VARCHAR2(100);
 BEGIN
-SELECT ROWNUM INTO X FROM ALL_TABLES WHERE OWNER = schema_name AND TABLE_NAME = tableName;
+  SELECT ROWNUM INTO X FROM ALL_TABLES WHERE OWNER = schema_name AND TABLE_NAME = tableName;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-BEGIN
+    BEGIN
       newQuery := query;
 
       IF NOT table_tablespace IS NULL THEN
         tableSpace := 'TABLESPACE ' || table_tablespace;
         newQuery := REPLACE(newQuery, '%TABLETABLESPACE%', tableSpace );
-ELSE
+      ELSE
         newQuery := REPLACE(newQuery, '%TABLETABLESPACE%');
-END IF;
+      END IF;
 
       IF NOT index_tablespace IS NULL THEN
         tableSpace := 'USING INDEX TABLESPACE ' || index_tablespace;
         newQuery := REPLACE(newQuery, '%INDEXTABLESPACE%',tableSpace );
-ELSE
+      ELSE
         newQuery := REPLACE(newQuery, '%INDEXTABLESPACE%');
-END IF;
+      END IF;
 
       IF NOT lob_tablespace IS NULL THEN
         tableSpace := 'TABLESPACE ' || lob_tablespace;
         newQuery := REPLACE(newQuery, '%LOBTABLESPACE%', tableSpace );
-ELSE
+      ELSE
         newQuery := REPLACE(newQuery, '%LOBTABLESPACE%');
-END IF;
+      END IF;
 
-EXECUTE IMMEDIATE newQuery;
-END;
+      EXECUTE IMMEDIATE newQuery;
+    END;
 END CREATE_TABLE;
 
 --
@@ -101,15 +101,15 @@ IS
 BEGIN
   IF drop_tables = 'F' THEN
     RETURN;
-END IF;
-SELECT ROWNUM INTO X FROM ALL_TABLES WHERE OWNER = schema_name AND TABLE_NAME = tableName;
-IF x <> 0 THEN
-BEGIN
+  END IF;
+  SELECT ROWNUM INTO X FROM ALL_TABLES WHERE OWNER = schema_name AND TABLE_NAME = tableName;
+  IF x <> 0 THEN
+    BEGIN
       query := 'DROP TABLE ' || tableName || ' CASCADE CONSTRAINTS';
-EXECUTE IMMEDIATE query;
-END;
-END IF;
-EXCEPTION
+      EXECUTE IMMEDIATE query;
+    END;
+  END IF;
+  EXCEPTION
     WHEN NO_DATA_FOUND THEN
       NULL;
 END DROP_TABLE;
@@ -128,12 +128,12 @@ PROCEDURE CREATE_VIEW
 IS
   x    NUMBER;
 BEGIN
-SELECT ROWNUM INTO X FROM ALL_VIEWS WHERE OWNER = schema_name AND VIEW_NAME = viewName;
+  SELECT ROWNUM INTO X FROM ALL_VIEWS WHERE OWNER = schema_name AND VIEW_NAME = viewName;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-BEGIN
-EXECUTE IMMEDIATE query;
-END;
+    BEGIN
+      EXECUTE IMMEDIATE query;
+    END;
 END CREATE_VIEW;
 
 
@@ -156,16 +156,16 @@ BEGIN
     indexName := 'IDX_' || tableName || '_' || fields;
     indexName := REPLACE(indexName, ' ', '');
     indexName := REPLACE(indexName, ',', '_');
-SELECT ROWNUM INTO X FROM ALL_INDEXES WHERE OWNER = schema_name AND INDEX_NAME = indexname;
+    SELECT ROWNUM INTO X FROM ALL_INDEXES WHERE OWNER = schema_name AND INDEX_NAME = indexname;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-BEGIN
+    BEGIN
       IF NOT index_tablespace IS NULL THEN
         tableSpace := 'TABLESPACE ' || index_tablespace;
-END IF;
+      END IF;
       query := 'CREATE INDEX ' || indexname || ' ON ' || tableName || ' ( ' || fields || ' ) ' || tableSpace;
-EXECUTE IMMEDIATE query;
-END;
+      EXECUTE IMMEDIATE query;
+    END;
 END CREATE_INDEX;
 
 
@@ -186,16 +186,16 @@ IS
   indexName VARCHAR2(100);
 BEGIN
     indexName := 'FK_' || tableName || '_' || columnName;
-SELECT ROWNUM INTO X FROM ALL_INDEXES WHERE OWNER = schema_name AND INDEX_NAME = indexname;
+    SELECT ROWNUM INTO X FROM ALL_INDEXES WHERE OWNER = schema_name AND INDEX_NAME = indexname;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-BEGIN
+    BEGIN
       IF NOT index_tablespace IS NULL THEN
         tableSpace := 'TABLESPACE ' || index_tablespace;
-END IF;
+      END IF;
       query := 'CREATE INDEX ' || indexname || ' ON ' || tableName || ' ( ' || columnName || ' ) ' || tableSpace;
-EXECUTE IMMEDIATE query;
-END;
+      EXECUTE IMMEDIATE query;
+    END;
 END CREATE_FOREIGN_KEY_INDEX;
 
 
@@ -216,16 +216,16 @@ IS
   tableSpace VARCHAR2(100);
 BEGIN
   constraintName := 'PK_' || tableName;
-SELECT COUNT(COLUMN_NAME) INTO x FROM ALL_CONS_COLUMNS WHERE OWNER = schema_name AND CONSTRAINT_NAME = constraintName AND TABLE_NAME = tableName;
-IF x = 0 THEN
-BEGIN
+  SELECT COUNT(COLUMN_NAME) INTO x FROM ALL_CONS_COLUMNS WHERE OWNER = schema_name AND CONSTRAINT_NAME = constraintName AND TABLE_NAME = tableName;
+  IF x = 0 THEN
+    BEGIN
       IF NOT index_tablespace IS NULL THEN
         tableSpace := 'USING INDEX TABLESPACE ' || index_tablespace;
-END IF;
+      END IF;
       query := 'ALTER TABLE ' || tableName || ' ADD CONSTRAINT ' || constraintName || ' PRIMARY KEY (' || columnList || ' ) ' || tableSpace;
-EXECUTE IMMEDIATE query;
-END;
-END IF;
+      EXECUTE IMMEDIATE query;
+    END;
+  END IF;
 END CREATE_PRIMARY_KEY;
 
 
@@ -249,18 +249,18 @@ IS
   constraintName VARCHAR2(100);
 BEGIN
   constraintName := 'FK_' || tableName || '_' || columnName;
-SELECT COUNT(COLUMN_NAME) INTO x FROM ALL_CONS_COLUMNS WHERE OWNER = schema_name AND CONSTRAINT_NAME = constraintName AND TABLE_NAME = tableName;
-IF x = 0 THEN
-BEGIN
+  SELECT COUNT(COLUMN_NAME) INTO x FROM ALL_CONS_COLUMNS WHERE OWNER = schema_name AND CONSTRAINT_NAME = constraintName AND TABLE_NAME = tableName;
+  IF x = 0 THEN
+    BEGIN
       query := 'ALTER TABLE ' || tableName || ' ADD CONSTRAINT ' || constraintName || ' FOREIGN KEY (' || columnName || ' ) REFERENCES ' || foreignTableName || '(' || foreignColumnName || ') DISABLE ' || tableSpace;
-EXECUTE IMMEDIATE query;
-END;
-END IF;
+      EXECUTE IMMEDIATE query;
+    END;
+  END IF;
   -- Create the index separately from the block that creates the constraint, so the CREATE_FOREIGN_INDEX call will be made even if the foreign key constraint exists.
   -- Don't create a foreign key index on the primary key column because it is already indexed by the primary key.
   IF columnName <> foreignColumnName THEN
     CREATE_FOREIGN_KEY_INDEX(tableName, columnName);
-END IF;
+  END IF;
 END CREATE_FOREIGN_KEY;
 
 
@@ -281,16 +281,16 @@ IS
   tableSpace VARCHAR2(100);
 BEGIN
   constraintName := 'NK_' || tableName;
-SELECT COUNT(COLUMN_NAME) INTO x FROM ALL_CONS_COLUMNS WHERE OWNER = schema_name AND CONSTRAINT_NAME = constraintName AND TABLE_NAME = tableName;
-IF x = 0 THEN
-BEGIN
+  SELECT COUNT(COLUMN_NAME) INTO x FROM ALL_CONS_COLUMNS WHERE OWNER = schema_name AND CONSTRAINT_NAME = constraintName AND TABLE_NAME = tableName;
+  IF x = 0 THEN
+    BEGIN
       IF NOT index_tablespace IS NULL THEN
         tableSpace := 'USING INDEX TABLESPACE ' || index_tablespace;
-END IF;
+      END IF;
       query := 'ALTER TABLE ' || tableName || ' ADD CONSTRAINT ' || constraintName || ' UNIQUE (' || columnList || ' ) ' || tableSpace;
-EXECUTE IMMEDIATE query;
-END;
-END IF;
+      EXECUTE IMMEDIATE query;
+    END;
+  END IF;
 END CREATE_NATURAL_KEY;
 
 
@@ -307,10 +307,10 @@ PROCEDURE ADD_TABLE_COMMENT
 IS
   x    NUMBER;
 BEGIN
-SELECT COUNT(TABLE_NAME) INTO x FROM ALL_TAB_COMMENTS WHERE OWNER = schema_name AND TABLE_NAME = tableName;
-IF x = 0 THEN
+  SELECT COUNT(TABLE_NAME) INTO x FROM ALL_TAB_COMMENTS WHERE OWNER = schema_name AND TABLE_NAME = tableName;
+  IF x = 0 THEN
     EXECUTE IMMEDIATE 'COMMENT ON TABLE ' || tableName || ' IS ''' || commentString || '''';
-END IF;
+  END IF;
 END ADD_TABLE_COMMENT;
 
 
@@ -327,7 +327,7 @@ PROCEDURE ADD_COLUMN_COMMENT
 )
 IS
 BEGIN
-EXECUTE IMMEDIATE 'COMMENT ON COLUMN ' || tableName || '.' || columnName || ' IS ''' || commentString || '''';
+  EXECUTE IMMEDIATE 'COMMENT ON COLUMN ' || tableName || '.' || columnName || ' IS ''' || commentString || '''';
 END ADD_COLUMN_COMMENT;
 
 
@@ -346,13 +346,13 @@ IS
   x    NUMBER;
   QUERY NCLOB;
 BEGIN
-SELECT ROWNUM INTO X FROM ALL_TAB_COLUMNS WHERE OWNER = schema_name AND TABLE_NAME = v_TableName AND COLUMN_NAME = v_ColumnName;
+  SELECT ROWNUM INTO X FROM ALL_TAB_COLUMNS WHERE OWNER = schema_name AND TABLE_NAME = v_TableName AND COLUMN_NAME = v_ColumnName;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-BEGIN
+    BEGIN
       QUERY := 'ALTER TABLE ' || v_TableName || ' ADD ( ' || v_ColumnName || ' ' || v_ColumnType || ' )';
-EXECUTE IMMEDIATE QUERY;
-END;
+      EXECUTE IMMEDIATE QUERY;
+    END;
 END ADD_COLUMN;
 
 
@@ -369,16 +369,16 @@ IS
   query NCLOB;
 BEGIN
   -- Check if the index exists
-BEGIN SELECT ROWNUM INTO x FROM ALL_INDEXES WHERE OWNER = schema_name AND INDEX_NAME = UPPER(v_indexName);
-EXCEPTION
+  BEGIN SELECT ROWNUM INTO x FROM ALL_INDEXES WHERE OWNER = schema_name AND INDEX_NAME = UPPER(v_indexName);
+  EXCEPTION
     WHEN NO_DATA_FOUND THEN
       -- If the index doesn't exist, exit the procedure
       RETURN;
-END;
+  END;
 
   -- Drop the index if it exists
   query := 'DROP INDEX ' || v_indexName;
-EXECUTE IMMEDIATE query;
+  EXECUTE IMMEDIATE query;
 END DROP_INDEX;
 
 
@@ -395,7 +395,7 @@ IS
 BEGIN
   -- Drop the NOT NULL constraint if it exists
   query := 'ALTER TABLE ' || v_TableName || ' MODIFY ' || v_ColumnName || ' NULL';
-EXECUTE IMMEDIATE query;
+  EXECUTE IMMEDIATE query;
 EXCEPTION
     WHEN OTHERS THEN
         NULL; -- Ignore errors, such as if the column is already nullable
@@ -415,19 +415,19 @@ IS
   query NCLOB;
 BEGIN
   -- Check if the constraint exists and get the table name
-BEGIN
-SELECT TABLE_NAME INTO v_tableName FROM ALL_CONSTRAINTS WHERE OWNER = schema_name AND CONSTRAINT_NAME = UPPER(v_constraintName);
-EXCEPTION
+  BEGIN
+    SELECT TABLE_NAME INTO v_tableName FROM ALL_CONSTRAINTS WHERE OWNER = schema_name AND CONSTRAINT_NAME = UPPER(v_constraintName);
+  EXCEPTION
     WHEN NO_DATA_FOUND THEN
       -- If the constraint doesn't exist, exit the procedure
       RETURN;
-END;
+  END;
 
   -- Drop the constraint if it exists
   query := 'ALTER TABLE ' || v_tableName || ' DROP CONSTRAINT ' || v_constraintName;
-EXECUTE IMMEDIATE query;
+  EXECUTE IMMEDIATE query;
 
-DROP_INDEX(v_constraintName);
+  DROP_INDEX(v_constraintName);
 END DROP_UNIQUE_CONSTRAINT;
 
 
@@ -499,6 +499,8 @@ DROP_TABLE('WST_LCK');
 DROP_TABLE('WST_DCT');
 DROP_TABLE('BATCH');
 DROP_TABLE('BATCHREP');
+DROP_TABLE('PROJECT_CONTROL_ACCOUNT_TOTAL');
+DROP_TABLE('PROJECT_WORK_PACKAGE_TOTAL');
 
 -- Create table CODE
 CREATE_TABLE(
@@ -1884,7 +1886,7 @@ CREATE_TABLE(
 
 CREATE_PRIMARY_KEY('PROJECT_CAWP_TOTAL', 'ROW_UID');
 
-ADD_COLUMN_COMMENT('PROJECT_CAWP_TOTAL', 'ROW_UID', 'Unique CAWP Identifier.');
+ADD_COLUMN_COMMENT('PROJECT_CAWP_TOTAL', 'ROW_UID', 'Unique CAWP Identifier. THIS TABLE IS DEPRECATED');
 ADD_COLUMN_COMMENT('PROJECT_CAWP_TOTAL', 'ACWP', 'Actual Cost');
 ADD_COLUMN_COMMENT('PROJECT_CAWP_TOTAL', 'BCWP', 'Earned Cost');
 ADD_COLUMN_COMMENT('PROJECT_CAWP_TOTAL', 'BCWS', 'Budget Cost');
@@ -3741,6 +3743,100 @@ ADD_COLUMN_COMMENT('BATCHREP', 'ROW_UID', 'Unique Note Text Identifier.');
 ADD_COLUMN_COMMENT('BATCHREP', 'CREATED_BY_USER_UID', 'The User that created the User Code Value.');
 ADD_COLUMN_COMMENT('BATCHREP', 'CREATED_DATE', 'Date the User Code Value was created.');
 
+-- Create table PROJECT_CONTROL_ACCOUNT_TOTAL
+CREATE_TABLE(
+ 'PROJECT_CONTROL_ACCOUNT_TOTAL',
+ 'CREATE TABLE PROJECT_CONTROL_ACCOUNT_TOTAL (
+    ROW_UID RAW(16) NOT NULL,
+    ACWP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BAC NUMBER(21,6) DEFAULT (0) NOT NULL,
+    EAC NUMBER(21,6) DEFAULT (0) NOT NULL,
+    EAC_NONLAB NUMBER(21,6) DEFAULT (0) NOT NULL,
+    ACWP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWS_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BAC_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    EAC_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    ACWPCP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWPCP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWSCP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    ACWPCP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWPCP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWSCP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL
+)
+ %TABLETABLESPACE%'
+);
+
+CREATE_PRIMARY_KEY('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ROW_UID');
+
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ROW_UID', 'Unique Control Account Identifier');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ACWP', 'Actual Cost');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWP', 'Earned Cost');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWS', 'Budget Cost');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BAC', 'Budget Cost At Completion');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'EAC', 'Forecast or Estimated Cost at Completion');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'EAC_NONLAB', 'Forecast or Estimated Non-Labor Cost at Completion');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ACWP_HRS', 'Actual Hours');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWP_HRS', 'Earned Hours');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWS_HRS', 'Budget Hours');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BAC_HRS', 'Budget Hours At Completion');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'EAC_HRS', 'Forecast or Estimated Hours at Completion');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ACWPCP', 'Current Period Actual Cost');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWPCP', 'Current Period Earned Cost');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWSCP', 'Current Period Budget Cost');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ACWPCP_HRS', 'Current Period Actual Hours');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWPCP_HRS', 'Current Period Earned Hours');
+ADD_COLUMN_COMMENT('PROJECT_CONTROL_ACCOUNT_TOTAL', 'BCWSCP_HRS', 'Current Period Budget Hours');
+
+-- Create table PROJECT_WORK_PACKAGE_TOTAL
+CREATE_TABLE(
+ 'PROJECT_WORK_PACKAGE_TOTAL',
+ 'CREATE TABLE PROJECT_WORK_PACKAGE_TOTAL (
+    ROW_UID RAW(16) NOT NULL,
+    ACWP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BAC NUMBER(21,6) DEFAULT (0) NOT NULL,
+    EAC NUMBER(21,6) DEFAULT (0) NOT NULL,
+    EAC_NONLAB NUMBER(21,6) DEFAULT (0) NOT NULL,
+    ACWP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWS_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BAC_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    EAC_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    ACWPCP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWPCP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWSCP NUMBER(21,6) DEFAULT (0) NOT NULL,
+    ACWPCP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWPCP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL,
+    BCWSCP_HRS NUMBER(21,6) DEFAULT (0) NOT NULL
+)
+ %TABLETABLESPACE%'
+);
+
+CREATE_PRIMARY_KEY('PROJECT_WORK_PACKAGE_TOTAL', 'ROW_UID');
+
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'ROW_UID', 'Unique Work Package Identifier');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'ACWP', 'Actual Cost');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWP', 'Earned Cost');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWS', 'Budget Cost');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BAC', 'Budget Cost At Completion');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'EAC', 'Forecast or Estimated Cost at Completion');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'EAC_NONLAB', 'Forecast or Estimated Non-Labor Cost at Completion');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'ACWP_HRS', 'Actual Hours');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWP_HRS', 'Earned Hours');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWS_HRS', 'Budget Hours');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BAC_HRS', 'Budget Hours At Completion');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'EAC_HRS', 'Forecast or Estimated Hours at Completion');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'ACWPCP', 'Current Period Actual Cost');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWPCP', 'Current Period Earned Cost');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWSCP', 'Current Period Budget Cost');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'ACWPCP_HRS', 'Current Period Actual Hours');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWPCP_HRS', 'Current Period Earned Hours');
+ADD_COLUMN_COMMENT('PROJECT_WORK_PACKAGE_TOTAL', 'BCWSCP_HRS', 'Current Period Budget Hours');
+
 CREATE_FOREIGN_KEY('CODE', 'CODE_FILE_UID', 'CODE_FILE', 'ROW_UID');
 CREATE_FOREIGN_KEY('CODE', 'PARENT_CODE_UID', 'CODE', 'ROW_UID');
 CREATE_FOREIGN_KEY('CODE_THRESHOLD', 'ROW_UID', 'CODE', 'ROW_UID');
@@ -3815,4 +3911,6 @@ CREATE_FOREIGN_KEY('PROCESSLOGLINK', 'PROCESSLOG_UID', 'PROCESSLOG', 'ROW_UID');
 CREATE_FOREIGN_KEY('TEMP_CAWPID', 'PROJECT_CAWP_UID', 'PROJECT_CAWP', 'ROW_UID');
 CREATE_FOREIGN_KEY('TEMP_CAWPID', 'PROJECT_UID', 'PROJECT', 'ROW_UID');
 CREATE_FOREIGN_KEY('BATCHREP', 'PROJECT_UID', 'PROJECT', 'ROW_UID');
+CREATE_FOREIGN_KEY('PROJECT_CONTROL_ACCOUNT_TOTAL', 'ROW_UID', 'PROJECT_CONTROL_ACCOUNT', 'ROW_UID');
+CREATE_FOREIGN_KEY('PROJECT_WORK_PACKAGE_TOTAL', 'ROW_UID', 'PROJECT_WORK_PACKAGE', 'ROW_UID');
 END;
