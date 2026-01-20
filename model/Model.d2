@@ -1229,7 +1229,6 @@ projects: {
     BCWSCP: NUMBER(21,6)
     ACWPCP_HRS: NUMBER(21,6)
     BCWPCP_HRS: NUMBER(21,6)
-    BCWSCP_HRS: NUMBER(21,6)
   }
 
   PROJECT_WP_MILESTONE: {
@@ -1252,6 +1251,12 @@ projects: {
     PROGRAM: VARCHAR2
     CAWPID: NUMBER(19,0)
     FORECAST_FINISH: DATE
+  }
+
+  Projects: {
+    shape: sql_table
+    BCWSCP_HRS: NUMBER(21,6)
+    COL1: NUMBER(21,6)
   }
 
   RCUTOFF: {
