@@ -28749,7 +28749,13 @@
                             "Old Data Type": "",
                             "Old Data Length": "",
                             "Migrate from Cobra DeskTop Table": ""
-                        },
+                        }
+                    ]
+                },
+                "Projects": {
+                    "TABLE_FLAGS": "",
+                    "TABLE_DESCRIPTION": "",
+                    "COLUMNS": [
                         {
                             "COLUMN_NAME": "BCWSCP_HRS",
                             "COLUMN_ORDER": "19",
@@ -28768,7 +28774,32 @@
                             "JAVA_PROPERTY_NAME": "bcwpCpHours",
                             "JAVA_DATA_TYPE": "java.math.BigDecimal",
                             "COLUMN_FLAGS": "",
-                            "Table.Column": "PROJECT_WORK_PACKAGE_TOTAL.BCWSCP_HRS",
+                            "Table.Column": "",
+                            "Found in Mapping?": "",
+                            "Old Table.Column": "",
+                            "Old Data Type": "",
+                            "Old Data Length": "",
+                            "Migrate from Cobra DeskTop Table": ""
+                        },
+                        {
+                            "COLUMN_NAME": "COL1",
+                            "COLUMN_ORDER": "19",
+                            "DATA_TYPE": "DECIMAL",
+                            "SQL_DATA_TYPE": "NUMBER(21,6)",
+                            "DATA_LENGTH": "",
+                            "SCALE": "",
+                            "NOT_NULL": "Y",
+                            "DEFAULT": "0",
+                            "PRIMARY_KEY": "",
+                            "NATURAL_KEY": "",
+                            "FKEY_TABLE": "",
+                            "FKEY_COLUMN": "",
+                            "FKEY_CARDINALITY": "",
+                            "DESCRIPTION": "Current Period Budget Hours",
+                            "JAVA_PROPERTY_NAME": "bcwpCpHours",
+                            "JAVA_DATA_TYPE": "java.math.BigDecimal",
+                            "COLUMN_FLAGS": "",
+                            "Table.Column": "",
                             "Found in Mapping?": "",
                             "Old Table.Column": "",
                             "Old Data Type": "",
